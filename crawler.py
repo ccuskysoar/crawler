@@ -5,6 +5,7 @@ import time
 import re
 import urllib2
 import argparse
+import socket
 url_list = list()
 oldUrl_list = list()
 
@@ -19,28 +20,41 @@ def crawler(url):
             url_list.pop(0)
         else:
             if isConnect(url_list[0]):
-                page = urllib2.urlopen(url_list[0])
+                page = urllib2.urlopen(url_list[0].encode('utf-8'),timeout=5)
+                #print(url_list[0])
                 soup = BeautifulSoup(page,'lxml')
                 ###find emails in the page###
-                email = re.findall(r'[A-Za-z0-9_\-\.]+\@[A-Za-z0-9_\-\.]+\.[A-Za-z]{2,4}', soup.prettify())
+                email = set(re.findall(r'[A-Za-z0-9_\-\.]+\@[A-Za-z0-9_\-\.]+\.[A-Za-z]{2,4}', soup.prettify()))
                 for j in email:
                    print(j)
                 ###find next page### 
                 for i in soup.find_all('a'):
                     link = i.attrs['href'] if "href" in i.attrs else ''
+                    #print link
                     if link[0:4] == 'http':
                         if link in oldUrl_list:
                             pass
                         else:
                             url_list.append(link)
-                    elif link[0:1]==('.'):
-                        if link in oldUrl_list:
-                            pass
+                    elif link[0:2]=='./':
+                        if url_list[0][-1:]=='/':
+                           link = url_list[0] + link[2:] 
                         else:
                             link = url_list[0] + link[1:]
-                            url_list.append(link)    
+                        url_list.append(link)
+                    elif link[0:1]=='/':
+                        if url_list[0][-1:]=='/':
+                            link = url_list[0] + link[1:]
+                        else:
+                            link = url_list[0] + link
+                        url_list.append(link) 
+                    elif link[0:1]=='#':
+                        pass   
                     else:
-                       link = url_list[0] + '/' + link
+                       if url_list[0][-1:]=='/':
+                           link = url_list[0] + link
+                       else:
+                           link = url_list[0] + '/' + link
                        url_list.append(link)
                 oldUrl_list.append(url_list[0])
                 url_list.pop(0)
@@ -62,10 +76,16 @@ def checkUrl(url):
 
 def isConnect(url):
     try:
-        urllib2.urlopen(url)
-    #except urllib2.HTTPError, e:
-    except :
-        print(url)
+        urllib2.urlopen(url.encode('UTF-8'),timeout=5)
+    except urllib2.HTTPError, e:
+    #except :
+        #print(url)
+        return False
+    except urllib2.URLError, e:
+        return False
+    except socket.timeout, e:
+        return False
+    except socket.error, e:
         return False
     return True
 
