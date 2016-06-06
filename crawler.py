@@ -22,7 +22,6 @@ def crawler(url):
         else:
             if isConnect(url_list[0]):
                 page = urllib2.urlopen(url_list[0].encode('utf-8'),timeout=5)
-                #print(url_list[0])
                 soup = BeautifulSoup(page,'lxml')
                 ###find emails in the page###
                 email = set(re.findall(r'[A-Za-z0-9_\-\.]+\@[A-Za-z0-9_\-\.]+\.[A-Za-z]{2,4}', soup.prettify()))
@@ -33,7 +32,6 @@ def crawler(url):
                 ###find next page### 
                 for i in soup.find_all('a'):
                     link = i.attrs['href'] if "href" in i.attrs else ''
-                    #print link
                     if link[0:4] == 'http':
                         if link in oldUrl_list:
                             pass
@@ -68,11 +66,9 @@ def crawler(url):
 def checkUrl(url):
     if url[-3:]=='pdf' or url[-4:]=='pptx' or url[-3:]=='ppt' or url[-4:]=='docx' or url[-3:]=='doc':
         return -1
-    elif url[-3:]=='mp3' or url[-3:]=='mp4' or url[-3:]=='wmv' or url[-3:]=='avi' or url[-3:] =='flv':
+    elif url[-3:]=='mp3' or url[-3:]=='mp4' or url[-3:]=='mpg' or url[-3:]=='avi' or url[-4:] =='rmvb':
         return -1   
-    elif url[-3:]=='jpg' or url[-3:]=='png' or url[-3:]=='gif':
-        return -1
-    elif url[-3:]=='zip' or url[-3:]=='rar':
+    elif url[-3:]=='jpg' or url[-3:]=='png' or url[-3:]=='gif'or url[-3:]=='zip' or url[-3:]=='rar':
         return -1
     else:
         return 1
@@ -81,8 +77,6 @@ def isConnect(url):
     try:
         urllib2.urlopen(url.encode('UTF-8'),timeout=5)
     except urllib2.HTTPError, e:
-    #except :
-        #print(url)
         return False
     except urllib2.URLError, e:
         return False
