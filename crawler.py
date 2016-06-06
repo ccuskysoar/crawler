@@ -11,6 +11,7 @@ oldUrl_list = list()
 
 def crawler(url):
     url_list.append(url)
+    mailNumber = 0
     while len(url_list) > 0:
         flag = checkUrl(url_list[0])
         if url_list[0] in oldUrl_list:
@@ -27,6 +28,8 @@ def crawler(url):
                 email = set(re.findall(r'[A-Za-z0-9_\-\.]+\@[A-Za-z0-9_\-\.]+\.[A-Za-z]{2,4}', soup.prettify()))
                 for j in email:
                    print(j)
+                   mailNumber= mailNumber + 1
+                print('                    already crawled %s mails.' %mailNumber)
                 ###find next page### 
                 for i in soup.find_all('a'):
                     link = i.attrs['href'] if "href" in i.attrs else ''
